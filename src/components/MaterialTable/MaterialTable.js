@@ -25,7 +25,8 @@ const MaterialTable = () => {
 
     const [ columns, setColumns ] = useState([]);
     const [ rows, setRows ] = useState([]);
-    const [ isValidTable, setIsValidTable ] = useState(null);
+    const [ isValidTable, setIsValidTable ] = useState(true);
+    const [ errorReadFile, setErrorReadFile ] = useState('');
 
     // process CSV data
     const processData = dataString => {
@@ -36,6 +37,7 @@ const MaterialTable = () => {
             .slice(1)
             .filter(row => row.trim().length > 0)
             .map((row, index, array) => {
+                let valueId = index + 1;
                 const parsedRow = row
                     .trim()
                     .split(cellDelimeter)
@@ -57,7 +59,7 @@ const MaterialTable = () => {
                 return [
                     {
                         type: 'ID',
-                        value: index,
+                        value: valueId,
                         isValid: true,
                     },
                     ...validateRow,
@@ -126,6 +128,7 @@ const MaterialTable = () => {
         reader.onerror = () => {
             console.error('Failed to read file!' + reader.error);
             // alert to window
+            setErrorReadFile(`Error occurred reading file: ${reader.error}`);
         };
 
         reader.readAsBinaryString(file);
@@ -133,9 +136,9 @@ const MaterialTable = () => {
 
     return (
         <div className={classes.root} >
-            <Typography variant="h1" component="h2">
+            <Typography variant="h3" component="h1" className={classes.title} >
                 Upload and read CSV files in React.js
-            </Typography>
+            </Typography >
             <Button
                 variant="contained"
                 component="label"
@@ -149,6 +152,14 @@ const MaterialTable = () => {
                     hidden
                 />
             </Button >
+            {!isValidTable && <div className={classes.errorFile} >
+                File format is not correct!
+            </div >
+            }
+            {errorReadFile && <div className={classes.errorFile} >
+                {errorReadFile}
+            </div >
+            }
 
             {isValidTable && <Card className={classes.card} >
                 <TableContainer component={Paper} >
@@ -160,7 +171,7 @@ const MaterialTable = () => {
                                     <TableCell
                                         key={uuid()}
                                         align={index > 0 && index === columns.length ? 'right' : 'center'}
-                                        style={{ minWidth: '150' }}
+                                        className={classes.tableCell}
                                     >
                                         {column.label}
                                     </TableCell >
@@ -178,7 +189,7 @@ const MaterialTable = () => {
                                                     <TableCell
                                                         key={uuid()}
                                                         align={index > 0 && index === row.length ? 'right' : 'center'}
-                                                        style={!column.isValid ? { backgroundColor: '#F4CCCC' } : {}}
+                                                        className={!column.isValid ? classes.tableCellError : ''}
                                                     >
                                                         {column.value}
                                                     </TableCell >
