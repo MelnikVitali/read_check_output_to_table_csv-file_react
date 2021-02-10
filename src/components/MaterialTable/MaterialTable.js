@@ -49,10 +49,12 @@ const MaterialTable = () => {
                     });
 
                 const validateRow = parsedRow.map((cell) => {
+                    const parsedValue = cell.value.trim();
+                    const parsedType = cell.type.trim();
                     return {
-                        type: cell.type,
-                        value: cell.value,
-                        isValid: cellValidator(parsedRow, cell.type, cell.value)
+                        type: parsedType,
+                        value: parsedValue,
+                        isValid: cellValidator(parsedRow, parsedType, parsedValue)
                     };
                 });
 
@@ -106,32 +108,43 @@ const MaterialTable = () => {
     // handle file upload
     const handleFileUpload = e => {
         const file = e.target.files[0];
-        const reader = new FileReader();
 
-        reader.onload = (event) => {
-            /* Parse data */
-            const bstr = event.target.result;
-            const wb = XLSX.read(bstr, { type: 'binary' });
-            /* Get first worksheet */
-            const wsname = wb.SheetNames[0];
-            const ws = wb.Sheets[wsname];
-            /* Convert array of arrays */
-            const data = XLSX.utils.sheet_to_csv(ws, {
-                header: 1,
-                RS: rowDelimeter,
-                FS: cellDelimeter
-            });
+        if (file.name.split('.').splice(-1, 1)[0] !== 'csv') {
+            setErrorReadFile(`Error occurred reading file:  The file format is not .csv`);
 
-            processData(data);
-        };
+        } else {
+            const reader = new FileReader();
 
-        reader.onerror = () => {
-            console.error('Failed to read file!' + reader.error);
-            // alert to window
-            setErrorReadFile(`Error occurred reading file: ${reader.error}`);
-        };
+            reader.onload = (event) => {
+                /* Parse data */
+                const bstr = event.target.result;
+                const wb = XLSX.read(bstr, {
+                    type: 'binary',
+                    dateNF: 'mm/dd/yyyy; @',
+                    cellDates: true,
+                    raw: true
+                });
+                /* Get first worksheet */
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                /* Convert array of arrays */
+                const data = XLSX.utils.sheet_to_csv(ws, {
+                    header: 1,
+                    RS: rowDelimeter,
+                    FS: cellDelimeter,
+                });
 
-        reader.readAsBinaryString(file);
+                processData(data);
+            };
+
+            reader.onerror = () => {
+                console.error('Failed to read file!' + reader.error);
+                // alert to window
+                setErrorReadFile(`Error occurred reading file:  ${reader.error}`);
+            };
+
+            reader.readAsBinaryString(file);
+        }
     };
 
     return (
@@ -147,7 +160,7 @@ const MaterialTable = () => {
                 Import users
                 <input
                     type="file"
-                    accept=".csv"
+                    accept=".csv,.xlsx,.xls"
                     onChange={handleFileUpload}
                     hidden
                 />
