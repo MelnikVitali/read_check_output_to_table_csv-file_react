@@ -38,7 +38,6 @@ const isValidExpirationDate = (expirationDate) => {
     const reFirst = new RegExp('^((0?[1-9]|1[012])[/](0?[1-9]|[12][0-9]|3[01])[/](19|20)?[0-9]{2})*$'); // format MM/DD/YYYY
     const reSecond = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/; // format YYYY-MM-DD
 
-    console.log(expirationDate);
     return reFirst.test(expirationDate) || reSecond.test(expirationDate);
 };
 
@@ -48,38 +47,36 @@ const isValidLicenseNumber = (licenseNumber) => {
     return re.test(licenseNumber);
 };
 
-
 const cellValidator = (row, type, value) => {
     const age = row.find(cell => cell.type === 'Age');
+    const typeToUppercase = type.toUpperCase();
 
-    console.log(type + ': ' +value)
-
-    switch (type) {
-        case 'Email':
+    switch (typeToUppercase) {
+        case 'EMAIL':
             return isValidEmail(value);
 
-        case 'Phone':
+        case 'PHONE':
             return isValidPhone(value);
 
-        case 'Age':
+        case 'AGE':
             return isValidAge(value);
 
-        case 'Experience':
+        case 'EXPERIENCE':
             return isValidExpirience(value, age.value);
 
-        case 'Yearly Income':
+        case 'YEARLY INCOME':
             return isValidYearlyIncome(value);
 
-        case 'Expiration date':
+        case 'EXPIRATION DATE':
             return isValidExpirationDate(value);
 
-        // case 'License states' :
+        // case 'License states LICENSE STATES' :
             // return isValidLicenseStates(value);
 
-        case 'License number' :
+        case 'LICENCE NUMBER' :
             return isValidLicenseNumber(value);
 
-        case 'Has children' :
+        case 'HAS CHILDREN' :
             return isValidHasChildren(value);
 
         default:

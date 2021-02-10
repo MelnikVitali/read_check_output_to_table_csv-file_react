@@ -19,6 +19,7 @@ import { cellDelimeter, rowDelimeter } from '../../constans';
 import duplicateIds from '../../utils/duplicateIds';
 
 import useStyles from './styles';
+import changingValuesForOutput from '../../utils/changingValuesForOutput';
 
 const MaterialTable = () => {
     const classes = useStyles();
@@ -38,6 +39,7 @@ const MaterialTable = () => {
             .filter(row => row.trim().length > 0)
             .map((row, index, array) => {
                 let valueId = index + 1;
+
                 const parsedRow = row
                     .trim()
                     .split(cellDelimeter)
@@ -48,13 +50,24 @@ const MaterialTable = () => {
                         };
                     });
 
-                const validateRow = parsedRow.map((cell) => {
-                    const parsedValue = cell.value.trim();
-                    const parsedType = cell.type.trim();
+                const validateAndChangingRow = parsedRow.map((cell) => {
+                    const valueWithoutSpaces = cell.value.trim();
+                    const typeWithoutSpaces = cell.type.trim();
+                    let correctedValuesForOutput = '';
+                    const typeToUppercase = typeWithoutSpaces.toUpperCase();
+
+                    if (typeToUppercase === 'YEARLY INCOME' ||
+                        typeToUppercase === 'LICENSE STATES' ||
+                        typeToUppercase === 'PHONE'
+                    ) {
+                        correctedValuesForOutput = changingValuesForOutput(typeToUppercase, valueWithoutSpaces);
+                    }
+
+                    // const changingValuesForOutput =
                     return {
-                        type: parsedType,
-                        value: parsedValue,
-                        isValid: cellValidator(parsedRow, parsedType, parsedValue)
+                        type: typeWithoutSpaces,
+                        value: (correctedValuesForOutput) ? correctedValuesForOutput : valueWithoutSpaces,
+                        isValid: cellValidator(parsedRow, typeWithoutSpaces, valueWithoutSpaces)
                     };
                 });
 
@@ -64,7 +77,7 @@ const MaterialTable = () => {
                         value: valueId,
                         isValid: true,
                     },
-                    ...validateRow,
+                    ...validateAndChangingRow,
                     {
                         type: 'Duplicate with',
                         value: duplicateIds(parsedRow, index, array),
