@@ -52,6 +52,7 @@ const MaterialTable = () => {
                     });
 
                 const validateAndChangingRow = parsedRow.map((cell) => {
+
                     const valueWithoutSpaces = cell.value.trim();
                     const typeWithoutSpaces = cell.type.trim();
                     let correctedValuesForOutput = '';
@@ -71,6 +72,9 @@ const MaterialTable = () => {
                     };
                 });
 
+                const isHeaderCellsTypeEmail = parsedRow.some(cell => cell.type.toUpperCase() === 'EMAIL');
+                const isHeaderCellsTypePhone = parsedRow.some(cell => cell.type.toUpperCase() === 'PHONE');
+
                 return [
                     {
                         type: 'ID',
@@ -80,7 +84,7 @@ const MaterialTable = () => {
                     ...validateAndChangingRow,
                     {
                         type: 'Duplicate with',
-                        value: duplicateIds(parsedRow, index, array),
+                        value: isHeaderCellsTypeEmail && isHeaderCellsTypePhone ? duplicateIds(parsedRow, index, array) : null,
                         isValid: true
                     }
                 ];
@@ -120,7 +124,7 @@ const MaterialTable = () => {
     const handleFileUpload = e => {
         const file = e.target.files[0];
 
-        if (file.name.split('.').splice(-1, 1)[0] !== 'csv') {
+        if (file.name && file.name.split('.').splice(-1, 1)[0] !== 'csv') {
             setErrorReadFile(`Error occurred reading file:  The file format is not .csv`);
 
         } else {
@@ -208,7 +212,7 @@ const MaterialTable = () => {
                                 return (
                                     <TableRow hover role="checkbox" key={uuid()} >
                                         {
-                                            row.map((column) => {
+                                            row.map((column, index) => {
                                                 return (
                                                     <TableCell
                                                         key={uuid()}
