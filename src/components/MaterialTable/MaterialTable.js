@@ -14,8 +14,10 @@ import {
     TableRow, Typography,
 } from '@material-ui/core';
 
-import cellValidator from '../../utils/cellValidator';
 import { cellDelimeter, rowDelimeter } from '../../constans';
+
+import cellValidator from '../../utils/cellValidator';
+import changingValuesForOutput from '../../utils/changingValuesForOutput';
 import duplicateIds from '../../utils/duplicateIds';
 
 import useStyles from './styles';
@@ -25,7 +27,8 @@ const MaterialTable = () => {
 
     const [ columns, setColumns ] = useState([]);
     const [ rows, setRows ] = useState([]);
-    const [ isValidTable, setIsValidTable ] = useState(null);
+    const [ isValidTable, setIsValidTable ] = useState(true);
+    const [ errorReadFile, setErrorReadFile ] = useState('');
 
     // process CSV data
     const processData = dataString => {
@@ -36,6 +39,8 @@ const MaterialTable = () => {
             .slice(1)
             .filter(row => row.trim().length > 0)
             .map((row, index, array) => {
+                let valueId = index + 1;
+
                 const parsedRow = row
                     .trim()
                     .split(cellDelimeter)
@@ -46,21 +51,33 @@ const MaterialTable = () => {
                         };
                     });
 
-                const validateRow = parsedRow.map((cell) => {
+                const validateAndChangingRow = parsedRow.map((cell) => {
+                    const valueWithoutSpaces = cell.value.trim();
+                    const typeWithoutSpaces = cell.type.trim();
+                    let correctedValuesForOutput = '';
+                    const typeToUppercase = typeWithoutSpaces.toUpperCase();
+
+                    if (typeToUppercase === 'YEARLY INCOME' ||
+                        typeToUppercase === 'LICENSE STATES' ||
+                        typeToUppercase === 'PHONE'
+                    ) {
+                        correctedValuesForOutput = changingValuesForOutput(typeToUppercase, valueWithoutSpaces);
+                    }
+
                     return {
-                        type: cell.type,
-                        value: cell.value,
-                        isValid: cellValidator(parsedRow, cell.type, cell.value)
+                        type: typeWithoutSpaces,
+                        value: (correctedValuesForOutput) ? correctedValuesForOutput : valueWithoutSpaces,
+                        isValid: cellValidator(parsedRow, typeWithoutSpaces, valueWithoutSpaces)
                     };
                 });
 
                 return [
                     {
                         type: 'ID',
-                        value: index,
+                        value: valueId,
                         isValid: true,
                     },
-                    ...validateRow,
+                    ...validateAndChangingRow,
                     {
                         type: 'Duplicate with',
                         value: duplicateIds(parsedRow, index, array),
@@ -68,7 +85,6 @@ const MaterialTable = () => {
                     }
                 ];
             });
-
 
         // prepare columns list from headers and remove the blank rows
         let noEmptyStringsHeaders = headers.filter(str => str.trim().length > 0);
@@ -100,42 +116,53 @@ const MaterialTable = () => {
         setColumns(columns);
     };
 
-
     // handle file upload
     const handleFileUpload = e => {
         const file = e.target.files[0];
-        const reader = new FileReader();
 
-        reader.onload = (event) => {
-            /* Parse data */
-            const bstr = event.target.result;
-            const wb = XLSX.read(bstr, { type: 'binary' });
-            /* Get first worksheet */
-            const wsname = wb.SheetNames[0];
-            const ws = wb.Sheets[wsname];
-            /* Convert array of arrays */
-            const data = XLSX.utils.sheet_to_csv(ws, {
-                header: 1,
-                RS: rowDelimeter,
-                FS: cellDelimeter
-            });
+        if (file.name.split('.').splice(-1, 1)[0] !== 'csv') {
+            setErrorReadFile(`Error occurred reading file:  The file format is not .csv`);
 
-            processData(data);
-        };
+        } else {
+            const reader = new FileReader();
 
-        reader.onerror = () => {
-            console.error('Failed to read file!' + reader.error);
-            // alert to window
-        };
+            reader.onload = (event) => {
+                /* Parse data */
+                const bstr = event.target.result;
+                const wb = XLSX.read(bstr, {
+                    type: 'binary',
+                    dateNF: 'mm/dd/yyyy; @',
+                    cellDates: true,
+                    raw: true
+                });
+                /* Get first worksheet */
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                /* Convert array of arrays */
+                const data = XLSX.utils.sheet_to_csv(ws, {
+                    header: 1,
+                    RS: rowDelimeter,
+                    FS: cellDelimeter,
+                });
 
-        reader.readAsBinaryString(file);
+                processData(data);
+            };
+
+            reader.onerror = () => {
+                console.error('Failed to read file!' + reader.error);
+                // alert to window
+                setErrorReadFile(`Error occurred reading file:  ${reader.error}`);
+            };
+
+            reader.readAsBinaryString(file);
+        }
     };
 
     return (
         <div className={classes.root} >
-            <Typography variant="h1" component="h2">
+            <Typography variant="h3" component="h1" className={classes.title} >
                 Upload and read CSV files in React.js
-            </Typography>
+            </Typography >
             <Button
                 variant="contained"
                 component="label"
@@ -149,6 +176,14 @@ const MaterialTable = () => {
                     hidden
                 />
             </Button >
+            {!isValidTable && <div className={classes.errorFile} >
+                File format is not correct!
+            </div >
+            }
+            {errorReadFile && <div className={classes.errorFile} >
+                {errorReadFile}
+            </div >
+            }
 
             {isValidTable && <Card className={classes.card} >
                 <TableContainer component={Paper} >
@@ -160,7 +195,7 @@ const MaterialTable = () => {
                                     <TableCell
                                         key={uuid()}
                                         align={index > 0 && index === columns.length ? 'right' : 'center'}
-                                        style={{ minWidth: '150' }}
+                                        className={classes.tableCell}
                                     >
                                         {column.label}
                                     </TableCell >
@@ -178,7 +213,7 @@ const MaterialTable = () => {
                                                     <TableCell
                                                         key={uuid()}
                                                         align={index > 0 && index === row.length ? 'right' : 'center'}
-                                                        style={!column.isValid ? { backgroundColor: '#F4CCCC' } : {}}
+                                                        className={!column.isValid ? classes.tableCellError : ''}
                                                     >
                                                         {column.value}
                                                     </TableCell >

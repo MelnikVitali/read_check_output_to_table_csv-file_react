@@ -1,3 +1,5 @@
+import { parse } from 'date-fns';
+
 const isValidEmail = (email) => {
     const re = /^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i;
 
@@ -10,33 +12,86 @@ const isValidPhone = (phone) => {
     return re.test(phone);
 };
 
+const isValidYearlyIncome = (yearlyIncome) => {
+    const parseYearlyIncome = Number(yearlyIncome);
+
+    return parseYearlyIncome < 1000000 && parseYearlyIncome >= 0;
+};
+
 const isValidAge = (age) => {
-    return Number.parseInt(age) && parseInt(age) >= 21;
+    const parsedAge = Number(age);
+
+    return Number.isInteger(parsedAge) && parsedAge >= 21;
 };
 
 const isValidExpirience = (experience, age) => {
     const parsedExperience = Number.parseFloat(experience);
     const parsedAge = Number.parseFloat(age);
 
-    return parsedExperience && parsedExperience <= parsedAge;
+    return parsedExperience && parsedExperience >= 0 && parsedExperience <= parsedAge;
+};
+
+const isValidHasChildren = (hasChildren) => {
+    const lowerValue = hasChildren.toLowerCase();
+
+    return (lowerValue === 'true' || lowerValue === 'false' || lowerValue === '');
+};
+
+const isValidExpirationDate = (expirationDate) => {
+    const reFirst = new RegExp('^((0?[1-9]|1[012])[/](0?[1-9]|[12][0-9]|3[01])[/](19|20)?[0-9]{2})*$'); // format MM/DD/YYYY
+    const reSecond = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/; // format YYYY-MM-DD
+
+    const firstStringDate = reFirst.test(expirationDate);
+    const secondStringDate = reSecond.test(expirationDate);
+    const currentData = new Date().getTime();
+
+    if (firstStringDate) {
+        const firstFormatData = parse(expirationDate, 'MM/dd/yyyy', new Date()).getTime();
+
+        return firstFormatData > currentData;
+    } else if (secondStringDate) {
+        const secondFormatData = parse(expirationDate, 'yyyy-MM-dd', new Date()).getTime();
+
+        return secondFormatData >= currentData;
+    } else {
+        return false;
+    }
+};
+
+const isValidLicenseNumber = (licenseNumber) => {
+    const re = /^[a-z0-9_-]{6}$/;
+
+    return re.test(licenseNumber);
 };
 
 const cellValidator = (row, type, value) => {
-
     const age = row.find(cell => cell.type === 'Age');
+    const typeToUppercase = type.toUpperCase();
 
-    switch (type) {
-        case 'Email':
+    switch (typeToUppercase) {
+        case 'EMAIL':
             return isValidEmail(value);
 
-        case 'Phone':
+        case 'PHONE':
             return isValidPhone(value);
 
-        case 'Age':
+        case 'AGE':
             return isValidAge(value);
 
-        case 'Experience':
+        case 'EXPERIENCE':
             return isValidExpirience(value, age.value);
+
+        case 'YEARLY INCOME':
+            return isValidYearlyIncome(value);
+
+        case 'EXPIRATION DATE':
+            return isValidExpirationDate(value);
+
+        case 'LICENCE NUMBER' :
+            return isValidLicenseNumber(value);
+
+        case 'HAS CHILDREN' :
+            return isValidHasChildren(value);
 
         default:
             return true;
