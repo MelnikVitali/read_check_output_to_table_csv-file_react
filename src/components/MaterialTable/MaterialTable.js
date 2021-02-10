@@ -171,7 +171,7 @@ const MaterialTable = () => {
                 Import users
                 <input
                     type="file"
-                    accept=".csv,.xlsx,.xls"
+                    accept=".csv"
                     onChange={handleFileUpload}
                     hidden
                 />
