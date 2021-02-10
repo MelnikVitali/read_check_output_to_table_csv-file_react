@@ -14,12 +14,13 @@ import {
     TableRow, Typography,
 } from '@material-ui/core';
 
-import cellValidator from '../../utils/cellValidator';
 import { cellDelimeter, rowDelimeter } from '../../constans';
+
+import cellValidator from '../../utils/cellValidator';
+import changingValuesForOutput from '../../utils/changingValuesForOutput';
 import duplicateIds from '../../utils/duplicateIds';
 
 import useStyles from './styles';
-import changingValuesForOutput from '../../utils/changingValuesForOutput';
 
 const MaterialTable = () => {
     const classes = useStyles();
@@ -63,7 +64,6 @@ const MaterialTable = () => {
                         correctedValuesForOutput = changingValuesForOutput(typeToUppercase, valueWithoutSpaces);
                     }
 
-                    // const changingValuesForOutput =
                     return {
                         type: typeWithoutSpaces,
                         value: (correctedValuesForOutput) ? correctedValuesForOutput : valueWithoutSpaces,
@@ -85,7 +85,6 @@ const MaterialTable = () => {
                     }
                 ];
             });
-
 
         // prepare columns list from headers and remove the blank rows
         let noEmptyStringsHeaders = headers.filter(str => str.trim().length > 0);
@@ -116,7 +115,6 @@ const MaterialTable = () => {
         setRows(rows);
         setColumns(columns);
     };
-
 
     // handle file upload
     const handleFileUpload = e => {

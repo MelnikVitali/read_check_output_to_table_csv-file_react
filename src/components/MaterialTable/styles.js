@@ -21,8 +21,8 @@ const useStyles = makeStyles(theme => ({
     tableCell: {
         minWidth: '150'
     },
-    tableCellError:{
-     backgroundColor:'#f4cccc',
+    tableCellError: {
+        backgroundColor: '#f4cccc',
         border: '1px solid rgb(224, 224, 224);'
     },
     errorFile: {

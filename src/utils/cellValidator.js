@@ -1,3 +1,5 @@
+import { parse } from 'date-fns';
+
 const isValidEmail = (email) => {
     const re = /^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i;
 
@@ -12,6 +14,7 @@ const isValidPhone = (phone) => {
 
 const isValidYearlyIncome = (yearlyIncome) => {
     const parseYearlyIncome = Number(yearlyIncome);
+
     return parseYearlyIncome < 1000000 && parseYearlyIncome >= 0;
 };
 
@@ -25,7 +28,7 @@ const isValidExpirience = (experience, age) => {
     const parsedExperience = Number.parseFloat(experience);
     const parsedAge = Number.parseFloat(age);
 
-    return parsedExperience && parsedExperience >=0 && parsedExperience <= parsedAge;
+    return parsedExperience && parsedExperience >= 0 && parsedExperience <= parsedAge;
 };
 
 const isValidHasChildren = (hasChildren) => {
@@ -38,7 +41,21 @@ const isValidExpirationDate = (expirationDate) => {
     const reFirst = new RegExp('^((0?[1-9]|1[012])[/](0?[1-9]|[12][0-9]|3[01])[/](19|20)?[0-9]{2})*$'); // format MM/DD/YYYY
     const reSecond = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/; // format YYYY-MM-DD
 
-    return reFirst.test(expirationDate) || reSecond.test(expirationDate);
+    const firstStringDate = reFirst.test(expirationDate);
+    const secondStringDate = reSecond.test(expirationDate);
+    const currentData = new Date().getTime();
+
+    if (firstStringDate) {
+        const firstFormatData = parse(expirationDate, 'MM/dd/yyyy', new Date()).getTime();
+
+        return firstFormatData > currentData;
+    } else if (secondStringDate) {
+        const secondFormatData = parse(expirationDate, 'yyyy-MM-dd', new Date()).getTime();
+
+        return secondFormatData >= currentData;
+    } else {
+        return false;
+    }
 };
 
 const isValidLicenseNumber = (licenseNumber) => {
@@ -69,9 +86,6 @@ const cellValidator = (row, type, value) => {
 
         case 'EXPIRATION DATE':
             return isValidExpirationDate(value);
-
-        // case 'License states LICENSE STATES' :
-            // return isValidLicenseStates(value);
 
         case 'LICENCE NUMBER' :
             return isValidLicenseNumber(value);

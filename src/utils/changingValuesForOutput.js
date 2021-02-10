@@ -9,9 +9,9 @@ const changingValuesPhone = (phone) => {
 };
 
 const changingValuesYearlyIncome = (yearlyIncome) => {
-    const isInteger = yearlyIncome ==='' || Number.isInteger(parseFloat(yearlyIncome) );
+    const isInteger = yearlyIncome === '' || Number.isInteger(parseFloat(yearlyIncome));
 
-    return  isInteger  ? Number(yearlyIncome): parseFloat(yearlyIncome).toFixed(2) ;
+    return isInteger ? Number(yearlyIncome) : parseFloat(yearlyIncome).toFixed(2);
 };
 
 const changingLicenseStates = (licenseStates) => {
@@ -20,13 +20,12 @@ const changingLicenseStates = (licenseStates) => {
         const newArr = arrLicenseStates.map(elem => {
             return String(elem).slice(0, 2).toUpperCase();
         });
-        console.log('newArr', newArr.join('|'));
+
         return newArr.join('|');
     } else {
         return String(licenseStates).slice(0, 2).toUpperCase();
     }
 };
-
 
 const changingValuesForOutput = (type, value) => {
     switch (type) {
