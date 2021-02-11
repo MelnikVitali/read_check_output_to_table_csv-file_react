@@ -1,7 +1,9 @@
-const changingValuesPhone = (phone) => {
+export const changingValuesPhone = (phone) => {
+    console.log('phone', phone.length);
     if (phone.length === 10) {
         return `+1${phone}`;
-    } else if (phone.length === 11 && phone.substring(0, 1)) {
+    } else if (phone.length === 11 && phone.trim().slice(0,1) === '1') {
+        console.log('phone', phone);
         return `+${phone}`;
     } else {
         return phone;
@@ -15,15 +17,22 @@ const changingValuesYearlyIncome = (yearlyIncome) => {
 };
 
 const changingLicenseStates = (licenseStates) => {
-    if (licenseStates.length > 2 && licenseStates.includes('|')) {
+    const re =/^(\w+)$/;
+
+    if (licenseStates.includes('|')) {
         const arrLicenseStates = licenseStates.split('|');
+
         const newArr = arrLicenseStates.map(elem => {
             return String(elem).slice(0, 2).toUpperCase();
         });
 
         return newArr.join('|');
-    } else {
+    } else if(re.test(licenseStates) && licenseStates.includes(',')){
+
         return String(licenseStates).slice(0, 2).toUpperCase();
+    }else{
+
+        return licenseStates;
     }
 };
 

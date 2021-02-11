@@ -1,7 +1,7 @@
 import { parse } from 'date-fns';
 
 const isValidEmail = (email) => {
-    const re = /^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i;
+    const re = /^[0-9a-zA-Z._%+-]+@[0-9a-zA-Z-]+.+.[a-zA-Z]{2,4}$/i;
 
     return re.test(email);
 };
@@ -24,7 +24,7 @@ const isValidAge = (age) => {
     return Number.isInteger(parsedAge) && parsedAge >= 21;
 };
 
-const isValidExpirience = (experience, age) => {
+const isValidExperience = (experience, age) => {
     const parsedExperience = Number.parseFloat(experience);
     const parsedAge = Number.parseFloat(age);
 
@@ -58,8 +58,14 @@ const isValidExpirationDate = (expirationDate) => {
     }
 };
 
+const isValidLicenseStates = (licenseStates) => {
+    const re = /^[0-9a-zA-Z|0-9a-zA-Z]*$/gim;
+
+    return re.test(licenseStates);
+};
+
 const isValidLicenseNumber = (licenseNumber) => {
-    const re = /^[a-z0-9_-]{6}$/;
+    const re = /^[0-9a-zA-Z]{6}$/gim;
 
     return re.test(licenseNumber);
 };
@@ -79,7 +85,7 @@ const cellValidator = (row, type, value) => {
             return isValidAge(value);
 
         case 'EXPERIENCE':
-            return isValidExpirience(value, age.value);
+            return isValidExperience(value, age.value);
 
         case 'YEARLY INCOME':
             return isValidYearlyIncome(value);
@@ -87,8 +93,11 @@ const cellValidator = (row, type, value) => {
         case 'EXPIRATION DATE':
             return isValidExpirationDate(value);
 
-        case 'LICENCE NUMBER' :
+        case 'LICENSE NUMBER' :
             return isValidLicenseNumber(value);
+
+        case 'LICENSE STATES' :
+            return isValidLicenseStates(value);
 
         case 'HAS CHILDREN' :
             return isValidHasChildren(value);

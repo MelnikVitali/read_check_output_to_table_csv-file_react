@@ -1,16 +1,21 @@
 import { cellDelimeter } from '../constans';
+import {changingValuesPhone} from "./changingValuesForOutput";
 
 const duplicateIds = (currentRow, currentRowIndex, rows) => {
     return rows
         .map((row, index) => {
             if (index !== currentRowIndex) {
+
                 const idDuplicateRow = index + 1;
                 const parsedRow = row.split(cellDelimeter);
+                const phoneIndex = currentRow.findIndex(cell => cell.type.toLowerCase() === 'phone');
+                const emailIndex = currentRow.findIndex(cell => cell.type.toLowerCase() === 'email');
+                const currentValuePhone = changingValuesPhone(currentRow[phoneIndex].value);
+                const parsedRowValuePhone = changingValuesPhone(parsedRow[phoneIndex]);
 
-                const phoneIndex = currentRow.findIndex(cell => cell.type === 'Phone');
-                const emailIndex = currentRow.findIndex(cell => cell.type === 'Email');
+                if (currentValuePhone === parsedRowValuePhone ||
+                    currentRow[emailIndex].value.toLowerCase() === parsedRow[emailIndex].toLowerCase()) {
 
-                if (currentRow[phoneIndex].value === parsedRow[phoneIndex] || currentRow[emailIndex].value === parsedRow[emailIndex]) {
                     return idDuplicateRow;
                 }
 
